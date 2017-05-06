@@ -6,6 +6,7 @@
 package techtonic;
 
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,6 +32,8 @@ import org.jwitsml.WitsmlLogCurve;
 import org.jwitsml.WitsmlWell;
 import org.jwitsml.WitsmlWellbore;
 import java.net.MalformedURLException;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  *
@@ -426,20 +429,54 @@ public class Techtonic extends javax.swing.JFrame {
 
                         for (int j = 0; j < logs.size(); j++) {
                             WitsmlLog log = logs.get(j);
-                             List<WitsmlLogCurve> curves = log.getCurves();
+                            List<WitsmlLogCurve> curves = log.getCurves();
                             System.out.println(
                                     "name: " + log.getName() + "\n"
                                     + "tvdunit:  " + log.getDescription() + "\n"
-                                    + "tvdunit:  " + log.getIndexType() + "\ntvdunit:  " + log.getIndexUnit() + "\n curve : " +log.getCurves() + "\n depth = "+ curves.get(0)+ "\n");
+                                    + "tvdunit:  " + log.getIndexType() + "\ntvdunit:  " + log.getIndexUnit() + "\n curve : " + log.getCurves() + "\n depth = " + curves.get(0) + "\nmeasurement = " + curves.get(j) + "\n");
 
 //                            List<WitsmlLogCurve> curves = log.getCurves();
                             WitsmlLogCurve depth = curves.get(0);
                             WitsmlLogCurve measurement = curves.get(j);
-                            data.setValue(depth.getName(), measurement.getNValues());
-                            JFreeChart piechart = ChartFactory.createPieChart("WitsmlLogCurve", data);
-                            displayAreaPanel.add(new ChartFrame(
-                                    "Pie Chart using JFreeChart",
-                                    piechart));
+                            for (WitsmlLogCurve c : curves) {
+                                System.out.println(
+                                        "curveNo: " + c.getCurveNo() + "\n"
+                                        + "name: " + c.getName() + "\n"
+                                        + "description:  " + c.getDescription() + "\n"
+                                        + "unit:  " + c.getUnit() + "\n"
+                                        + "toString:  " + c.getUnit() + "\n"
+                                );
+                                /* for each WitsmlLogCurve we can also access the values it stores */
+
+                                List<Object> values = c.getValues();
+                                for (int k = 0; k < values.size(); k++) {
+                                    System.out.print(
+                                            values.get(k) + " ");
+                                    series.add((Integer) values.get(k), (Integer) values.get(k + 1));
+                                }
+                                XYSeriesCollection data = new XYSeriesCollection();
+                                data.addSeries(series);
+                                JFreeChart chart = ChartFactory.createXYLineChart(
+                                        "Line Chart", // chart title
+                                        "x", "y", // x and y axis labels
+                                        data);
+                                ChartFrame frameChat = new ChartFrame(
+                                        "XY graph using JFreeChart", chart);
+                                frameChat.pack();
+                                frameChat.setVisible(true);
+//                                for (Object v : values) {
+//                                    System.out.print(
+//                                            v.toString() + " ");
+//                                    data.setValue(c.getName(), Integer.parseInt(v.toString()));
+//                                    JFreeChart piechart = ChartFactory.createPieChart("WitsmlLogCurve", data);
+//                                    Frame frameChat = new ChartFrame(
+//                                            "Pie Chart using JFreeChart",
+//                                            piechart);
+//                                    frameChat.pack();
+//                                    frameChat.setVisible(true);                                    
+//                                }
+                            }
+
                         }
                     }
                 });
@@ -510,7 +547,8 @@ public class Techtonic extends javax.swing.JFrame {
     List<WitsmlWell> wells;
     private int wellIndex;
     private Vector<String> arrName = new Vector<>();
-    DefaultPieDataset data = new DefaultPieDataset();
+//    DefaultPieDataset data = new DefaultPieDataset();
+    XYSeries series = new XYSeries("series name");
     List<WitsmlLog> logs = new ArrayList<>();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
